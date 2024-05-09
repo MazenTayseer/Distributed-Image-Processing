@@ -1,0 +1,4 @@
+- GUI
+- One image to be split on vms to be processed (If only one)
+- Handle images by copying needed images for VMs
+- Azure Load Balancer

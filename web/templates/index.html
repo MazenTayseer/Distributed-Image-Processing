@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Images</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <div id="groupContainer">
+        <div class="group">
+          <img src="" alt="" width="10%" />
+          <input type="text" name="operation[]" placeholder="Operation" />
+          <input type="file" name="images[]" />
+        </div>
+      </div>
+      <button type="button" id="addGroup">Add Group</button>
+      <button type="button" id="submitForm">Upload</button>
+    </form>
+
+    <script>
+      $(document).ready(function () {
+        $("#addGroup").click(function () {
+          var newGroup = $(".group").first().clone();
+          $("#groupContainer").append(newGroup);
+        });
+
+        $("#submitForm").click(function () {
+          var formData = new FormData($("#uploadForm")[0]);
+          $.ajax({
+            url: "/upload",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+              $(".group").each(function (index) {
+                var uploadedFileName = $(this)
+                  .find("input[type='file']")
+                  .prop("files")[0].name;
+                var responseFileName = response.images[index];
+
+                var matchFound = false;
+
+                // Loop until a match is found or the end of the response array is reached
+                for (var i = 0; i < response.images.length; i++) {
+                  if (uploadedFileName === response.images[i]) {
+                    matchFound = true;
+                    var imgSrc =
+                      "{{ url_for('static', filename='results/') }}" +
+                      response.images[i];
+                    $(this).find("img").attr("src", imgSrc);
+                    break; // Exit loop once a match is found
+                  }
+                }
+
+                // If no match is found, you can handle it here
+                if (!matchFound) {
+                  // Handle case where no matching filename is found
+                }
+              });
+            },
+            error: function (xhr, status, error) {
+              console.log(xhr.responseText);
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
